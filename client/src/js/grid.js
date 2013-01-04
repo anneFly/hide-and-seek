@@ -1,9 +1,9 @@
-var Grid = (function (Grid, $, console) {
+var Grid = (function (Grid, $, console, window) {
 	"use strict";
 	
 	var BLOCK_SIZE = 20,
-		START_X = 200,
-		START_Y = 200;
+		START_X = 12 * BLOCK_SIZE,
+		START_Y = 12 * BLOCK_SIZE;
 	
 	
 	var Field = function (i, j) {
@@ -22,7 +22,7 @@ var Grid = (function (Grid, $, console) {
 				top: y + BLOCK_SIZE / 2,
 				left: x + BLOCK_SIZE / 2
 			});
-		}
+		};
 	};
 	
 	var Player = function () {
@@ -209,4 +209,4 @@ var Grid = (function (Grid, $, console) {
 	
 	return Grid;
 	
-}(Grid || {}, jQuery, console));
+}(Grid || {}, jQuery, console, this));

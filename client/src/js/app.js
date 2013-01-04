@@ -6,15 +6,16 @@
 	App.init = function () {
 		var g;
 		
-		g = Grid.create(40, 40);
-		g.field[35][35].content = 'block';
-		g.field[35][34].content = 'block';
-		g.field[35][33].content = 'block';
-		g.field[35][32].content = 'block';
-		g.field[35][31].content = 'block';
-		g.field[35][30].content = 'block';
-		g.field[34][35].content = 'block';
-		g.field[33][35].content = 'block';
+		g = Grid.create(24, 24);
+		
+		g.field[5][13].content = 'block';
+		g.field[5][14].content = 'block';
+		g.field[5][15].content = 'block';
+		g.field[5][16].content = 'block';
+		g.field[5][17].content = 'block';
+		g.field[5][18].content = 'block';
+		g.field[4][18].content = 'block';
+		g.field[3][18].content = 'block';
 		g.field[20][12].content = 'block';
 		g.field[21][12].content = 'block';
 		g.field[22][13].content = 'block';
