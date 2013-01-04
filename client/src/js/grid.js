@@ -81,23 +81,23 @@ var Grid = (function (Grid, $, console, window) {
 						} else {
 							self.field[i][j].dark = true;
 						}
+						if (self.field[i][j].dark === true) {
+                            $('#x'+i+'y'+j).addClass('dark');
+                        } else {
+                            $('#x'+i+'y'+j).removeClass('dark');
+                        }
 
 					}
 				} else {
 					for (j = 0; j<self.y; j+=1) {
 						self.field[i][j].dark = true;
+						
+						if (self.field[i][j].dark === true) {
+                            $('#x'+i+'y'+j).addClass('dark');
+                        } else {
+                            $('#x'+i+'y'+j).removeClass('dark');
+                        }
 					}
-				}
-			}
-
-			for (i = 0; i<self.x; i+=1) {
-				for (j = 0; j<self.y; j+=1) {
-					if (self.field[i][j].dark === true) {
-						$('#x'+i+'y'+j).addClass('dark');
-					} else {
-						$('#x'+i+'y'+j).removeClass('dark');
-					}
-
 				}
 			}
 		};
