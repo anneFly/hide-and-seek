@@ -1,13 +1,11 @@
-(function ($, console, Grid) {
+(function ($, console, Grid, App) {
 	"use strict";
-	
-	var App = window.App || {};
-	
+
 	App.init = function () {
 		var g;
-		
+
 		g = Grid.create(24, 24);
-		
+
 		g.field[5][13].content = 'block';
 		g.field[5][14].content = 'block';
 		g.field[5][15].content = 'block';
@@ -21,9 +19,9 @@
 		g.field[22][13].content = 'block';
 		g.field[22][14].content = 'block';
 		g.draw();
-		
+
 	};
-	
+
 	App.init();
-}(jQuery, console, Grid));
+}(jQuery, console, Grid, window.App || {}));
 
