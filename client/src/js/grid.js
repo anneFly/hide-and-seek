@@ -28,26 +28,27 @@ var Grid = (function (Grid, $, console, window) {
 		this.y = START_Y;
 		this.$el = $('<div class="player">');
 		this.light = new Light();
-		this.draw = function () {
+    };
+    Player.prototype = {
+        draw: function () {
 			this.$el.css({
 				top: this.y,
 				left: this.x
 			});
 			this.light.draw(this.x, this.y);
-		};
-		this.moveUp = function () {
+		},
+        moveUp: function () {
 			this.y -= BLOCK_SIZE;
-		};
-		this.moveLeft = function () {
+		},
+        moveLeft: function () {
 			this.x -= BLOCK_SIZE;
-		};
-		this.moveDown = function () {
+		},
+        moveDown: function () {
 			this.y += BLOCK_SIZE;
-		};
-		this.moveRight = function () {
+		},
+        moveRight: function () {
 			this.x += BLOCK_SIZE;
-		};
-
+		}
 	};
 
 	var TheGrid = function (x, y) {

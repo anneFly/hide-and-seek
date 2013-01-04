@@ -1,4 +1,4 @@
-(function () {
+(function (window) {
     var noop = function () {};
 
     var genUniqueId = (function () {
@@ -42,4 +42,4 @@
     // mock the shit
     window.WebSocket = WebSocketMock;
 
-}());
+}(this));
