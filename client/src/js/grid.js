@@ -15,12 +15,12 @@ var Grid = (function (Grid, $, console, window) {
 		this.x = START_X;
 		this.y = START_Y;
 		this.$el = $('<div class="light">');
-		this.draw = function (x, y) {
-			this.$el.css({
-				top: y + BLOCK_SIZE / 2,
-				left: x + BLOCK_SIZE / 2
-			});
-		};
+	};
+	Light.prototype.draw = function (x, y) {
+		this.$el.css({
+			top: y + BLOCK_SIZE / 2,
+			left: x + BLOCK_SIZE / 2
+		});
 	};
 
 	var Player = function () {
@@ -136,6 +136,7 @@ var Grid = (function (Grid, $, console, window) {
 							self.player.moveDown();
 						}
 					);
+					return;
 				}
 				if ((e.which === 37) || (e.which === 65)) {
 					self.player.moveLeft();
@@ -149,6 +150,7 @@ var Grid = (function (Grid, $, console, window) {
 							self.player.moveRight();
 						}
 					);
+					return;
 				}
 				if ((e.which === 40) || (e.which ===  83)) {
 					self.player.moveDown();
@@ -162,6 +164,7 @@ var Grid = (function (Grid, $, console, window) {
 							self.player.moveUp();
 						}
 					);
+					return;
 				}
 				if ((e.which === 39) || (e.which === 68)) {
 					self.player.moveRight();
@@ -175,6 +178,7 @@ var Grid = (function (Grid, $, console, window) {
 							self.player.moveLeft();
 						}
 					);
+					return;
 				}
 			});
 
