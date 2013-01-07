@@ -1,78 +1,61 @@
-var Grid = (function (Grid, $, console, window) {
+var Grid = (function ($, console, window, document, Grid, Player) {
 	"use strict";
 
 	var BLOCK_SIZE = 20,
 		START_X = 12 * BLOCK_SIZE,
-		START_Y = 12 * BLOCK_SIZE;
+		START_Y = 12 * BLOCK_SIZE,
+		GRID_X,
+		GRID_Y,
+		Field, Gr,
+		mouseX = 0, mouseY = 0;
 
-	var Field = function (i, j) {
+	Field = function (i, j) {
 		this.x = i;
 		this.y = j;
-		this.content = 'free';
+		this.content = 'X';
 		this.dark = true;
 	};
-	var Light = function () {
-		this.x = START_X;
-		this.y = START_Y;
-		this.$el = $('<div class="light">');
-	};
-	Light.prototype.draw = function (x, y) {
-		this.$el.css({
-			top: y + BLOCK_SIZE / 2,
-			left: x + BLOCK_SIZE / 2
-		});
-	};
 
-	var Player = function () {
-		this.x = START_X;
-		this.y = START_Y;
-		this.$el = $('<div class="player">');
-		this.light = new Light();
-    };
-    Player.prototype = {
-        draw: function () {
-			this.$el.css({
-				top: this.y,
-				left: this.x
-			});
-			this.light.draw(this.x, this.y);
-		},
-        moveUp: function () {
-			this.y -= BLOCK_SIZE;
-		},
-        moveLeft: function () {
-			this.x -= BLOCK_SIZE;
-		},
-        moveDown: function () {
-			this.y += BLOCK_SIZE;
-		},
-        moveRight: function () {
-			this.x += BLOCK_SIZE;
-		}
-	};
-
-	var TheGrid = function (x, y) {
+	Gr = function (x, y) {
 		this.x = x;
 		this.y = y;
 		this.field = [];
 		this.$el = $('<div class="grid">');
-		this.player = new Player();
-		this.checkCollision = function (x, y) {
+		this.player = Player.create();
+	};
+	
+	Gr.prototype = {
+		checkCollision: function (x, y) {
 			var xpos = x/BLOCK_SIZE,
 				ypos = y/BLOCK_SIZE,
 				d = new $.Deferred();
-
-			if (this.field[xpos][ypos].content === 'block') {
+			
+			if ((xpos < 0) || (ypos < 0) || (xpos >= GRID_X) || (ypos >= GRID_Y)) {
+				d.reject();
+				return d.promise();
+			}
+				
+			if ((this.field[xpos][ypos].content === 'B')) {
 				d.reject();
 			} else {
 				d.resolve();
 			}
-
 			return d.promise();
-		};
-		this.drawFields = function () {
+		},
+		checkGoal: function (x, y) {
+			var xpos = x/BLOCK_SIZE,
+				ypos = y/BLOCK_SIZE,
+				d = new $.Deferred();
+
+			if ((this.field[xpos][ypos].content === 'G')) {
+				d.resolve();
+			} else {
+				d.reject();
+			}
+			return d.promise();
+		},
+		drawFields: function () {
 			var i, j, self = this;
-			var $cell = $('.grid-cell');
 			for (i = 0; i<self.x; i+=1) {
 				if ((i > (self.player.x/BLOCK_SIZE - 6)) && (i < (self.player.x/BLOCK_SIZE + 6))) {
 					for (j = 0; j<self.y; j+=1) {
@@ -86,12 +69,11 @@ var Grid = (function (Grid, $, console, window) {
                         } else {
                             $('#x'+i+'y'+j).removeClass('dark');
                         }
-
 					}
 				} else {
 					for (j = 0; j<self.y; j+=1) {
 						self.field[i][j].dark = true;
-						
+
 						if (self.field[i][j].dark === true) {
                             $('#x'+i+'y'+j).addClass('dark');
                         } else {
@@ -100,27 +82,41 @@ var Grid = (function (Grid, $, console, window) {
 					}
 				}
 			}
-		};
-		this.init = function () {
-			var i,
-				j,
-				self = this;
-			for (i = 0; i<self.x; i+=1) {
-				self.field[i] = [];
-				for (j = 0; j<self.y; j+=1) {
-					self.field[i][j] = new Field(i, j);
-				}
-			}
+		},
+		updateView: function () {
+			var x = mouseX - this.$el.get(0).offsetLeft + $(window).scrollLeft() - this.player.x,
+				y = mouseY - this.$el.get(0).offsetTop + $(window).scrollTop() - this.player.y,
+				rad = Math.atan2(y, x);
+
+			this.player.light.el.style['-webkit-transform'] = 'rotate(' + rad + 'rad)';
+			this.player.light.el.style['-moz-transform'] = 'rotate(' + rad + 'rad)';
+			this.player.light.el.style['-ms-transform'] = 'rotate(' + rad + 'rad)';
+			this.player.light.el.style.transform = 'rotate(' + rad + 'rad)';
+		},
+		bindEvents: function () {
+			var self = this,
+				checkGoalDeferred = function () {
+					$.when(self.checkGoal(self.player.x, self.player.y)).then(
+						function () {
+							alert('You win!!');
+						},
+						function () {
+							return;
+						}
+					);
+				};
 
 			this.$el.on('mousemove', function (e) {
-				var x = e.clientX - this.offsetLeft + $(window).scrollLeft() - self.player.x,
-					y = e.clientY - this.offsetTop + $(window).scrollTop() - self.player.y;
+				mouseX = e.clientX;
+				mouseY = e.clientY;
+				var x = mouseX - this.offsetLeft + $(window).scrollLeft() - self.player.x,
+					y = mouseY - this.offsetTop + $(window).scrollTop() - self.player.y,
+					rad = Math.atan2(y, x);
 
-				var rad = Math.atan2(y,x);
-
-				self.player.light.$el.css({
-					'-webkit-transform': 'rotate(' + rad + 'rad)'
-				});
+				self.player.light.el.style['-webkit-transform'] = 'rotate(' + rad + 'rad)';
+				self.player.light.el.style['-moz-transform'] = 'rotate(' + rad + 'rad)';
+				self.player.light.el.style['-ms-transform'] = 'rotate(' + rad + 'rad)';
+				self.player.light.el.style.transform = 'rotate(' + rad + 'rad)';
 			});
 
 			$(document).on('keydown', function (e) {
@@ -129,8 +125,9 @@ var Grid = (function (Grid, $, console, window) {
 					$.when(self.checkCollision(self.player.x, self.player.y)).then(
 						function () {
 							self.player.draw();
+							self.updateView();
 							self.drawFields();
-							self.$el.trigger('mousemove');
+							checkGoalDeferred();
 						},
 						function () {
 							self.player.moveDown();
@@ -143,8 +140,9 @@ var Grid = (function (Grid, $, console, window) {
 					$.when(self.checkCollision(self.player.x, self.player.y)).then(
 						function () {
 							self.player.draw();
+							self.updateView();
 							self.drawFields();
-							self.$el.trigger('mousemove');
+							checkGoalDeferred();
 						},
 						function () {
 							self.player.moveRight();
@@ -157,8 +155,9 @@ var Grid = (function (Grid, $, console, window) {
 					$.when(self.checkCollision(self.player.x, self.player.y)).then(
 						function () {
 							self.player.draw();
+							self.updateView();
 							self.drawFields();
-							self.$el.trigger('mousemove');
+							checkGoalDeferred();
 						},
 						function () {
 							self.player.moveUp();
@@ -171,8 +170,9 @@ var Grid = (function (Grid, $, console, window) {
 					$.when(self.checkCollision(self.player.x, self.player.y)).then(
 						function () {
 							self.player.draw();
+							self.updateView();
 							self.drawFields();
-							self.$el.trigger('mousemove');
+							checkGoalDeferred();
 						},
 						function () {
 							self.player.moveLeft();
@@ -181,35 +181,47 @@ var Grid = (function (Grid, $, console, window) {
 					return;
 				}
 			});
-
-		};
-		this.draw = function () {
-			var i, j, self = this;
-
-			var $ground = self.$el;
+		},
+		init: function () {
+			var i,
+				j,
+				self = this;
 			for (i = 0; i<self.x; i+=1) {
-				var $col = $('<div class="grid-col">');
+				self.field[i] = [];
 				for (j = 0; j<self.y; j+=1) {
-					var $cell = $('<div class="grid-cell">');
+					self.field[i][j] = new Field(i, j);
+				}
+			}
+			this.bindEvents();
+		},
+		draw: function () {
+			var i, j, self = this, $col, $cell;
+
+			for (i = 0; i<self.x; i+=1) {
+				$col = $('<div class="grid-col">');
+				for (j = 0; j<self.y; j+=1) {
+					$cell = $('<div class="grid-cell">');
 					$cell.addClass(self.field[i][j].content).attr('id', 'x'+i+'y'+j);
 					$col.append($cell);
 				}
-				$ground.append($col);
+				self.$el.append($col);
 			}
-			$ground.append(self.player.$el).append(self.player.light.$el);
+			self.$el.append(self.player.el).append(self.player.light.el);
 			self.player.draw();
-			$('body').append($ground);
+			$('body').append(self.$el);
 
 			self.drawFields();
-		};
+		}
 	};
 
 	Grid.create = function (x, y) {
-		var g = new TheGrid(x, y);
+		GRID_X = x;
+		GRID_Y = y;
+		var g = new Gr(x, y);
 		g.init();
 		return g;
 	};
 
 	return Grid;
 
-}(Grid || {}, jQuery, console, this));
+}(jQuery, console, this, this.document, Grid || {}, Player));

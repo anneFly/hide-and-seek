@@ -21,16 +21,20 @@ body {
     margin: 0;
 }
 
-.grid-cell.free {
+.grid-cell.X {
     background: #f5f5f5;
 }
 
-.grid-cell.block {
+.grid-cell.B {
     background: #222;
 }
 
+.grid-cell.G {
+    background: #ff0;
+}
+
 .grid-cell.dark {
-	background: #555555;
+    background: #555555;
 }
 
 .player {
