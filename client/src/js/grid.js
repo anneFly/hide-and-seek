@@ -4,8 +4,6 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 	var BLOCK_SIZE = 20,
 		START_X = 12 * BLOCK_SIZE,
 		START_Y = 12 * BLOCK_SIZE,
-		GRID_X,
-		GRID_Y,
 		Field, Gr,
 		mouseX = 0, mouseY = 0;
 
@@ -22,15 +20,16 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 		this.field = [];
 		this.$el = $('<div class="grid">');
 		this.player = Player.create();
+		this.opponent = Player.create();
 	};
 	
 	Gr.prototype = {
 		checkCollision: function (x, y) {
-			var xpos = x/BLOCK_SIZE,
-				ypos = y/BLOCK_SIZE,
+			var xpos = x,
+				ypos = y,
 				d = new $.Deferred();
 			
-			if ((xpos < 0) || (ypos < 0) || (xpos >= GRID_X) || (ypos >= GRID_Y)) {
+			if ((xpos < 0) || (ypos < 0) || (xpos >= this.x) || (ypos >= this.y)) {
 				d.reject();
 				return d.promise();
 			}
@@ -43,8 +42,8 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 			return d.promise();
 		},
 		checkGoal: function (x, y) {
-			var xpos = x/BLOCK_SIZE,
-				ypos = y/BLOCK_SIZE,
+			var xpos = x,
+				ypos = y,
 				d = new $.Deferred();
 
 			if ((this.field[xpos][ypos].content === 'G')) {
@@ -54,38 +53,9 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 			}
 			return d.promise();
 		},
-		drawFields: function () {
-			var i, j, self = this;
-			for (i = 0; i<self.x; i+=1) {
-				if ((i > (self.player.x/BLOCK_SIZE - 6)) && (i < (self.player.x/BLOCK_SIZE + 6))) {
-					for (j = 0; j<self.y; j+=1) {
-						if ((j > (self.player.y/BLOCK_SIZE - 6)) && (j < (self.player.y/BLOCK_SIZE + 6))) {
-							self.field[i][j].dark = false;
-						} else {
-							self.field[i][j].dark = true;
-						}
-						if (self.field[i][j].dark === true) {
-                            $('#x'+i+'y'+j).addClass('dark');
-                        } else {
-                            $('#x'+i+'y'+j).removeClass('dark');
-                        }
-					}
-				} else {
-					for (j = 0; j<self.y; j+=1) {
-						self.field[i][j].dark = true;
-
-						if (self.field[i][j].dark === true) {
-                            $('#x'+i+'y'+j).addClass('dark');
-                        } else {
-                            $('#x'+i+'y'+j).removeClass('dark');
-                        }
-					}
-				}
-			}
-		},
 		updateView: function () {
-			var x = mouseX - this.$el.get(0).offsetLeft + $(window).scrollLeft() - this.player.x,
-				y = mouseY - this.$el.get(0).offsetTop + $(window).scrollTop() - this.player.y,
+			var x = mouseX - this.$el.get(0).offsetLeft + $(window).scrollLeft() - this.player.x * BLOCK_SIZE,
+				y = mouseY - this.$el.get(0).offsetTop + $(window).scrollTop() - this.player.y * BLOCK_SIZE,
 				rad = Math.atan2(y, x);
 
 			this.player.light.el.style['-webkit-transform'] = 'rotate(' + rad + 'rad)';
@@ -109,8 +79,8 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 			this.$el.on('mousemove', function (e) {
 				mouseX = e.clientX;
 				mouseY = e.clientY;
-				var x = mouseX - this.offsetLeft + $(window).scrollLeft() - self.player.x,
-					y = mouseY - this.offsetTop + $(window).scrollTop() - self.player.y,
+				var x = mouseX - this.offsetLeft + $(window).scrollLeft() - self.player.x * BLOCK_SIZE,
+					y = mouseY - this.offsetTop + $(window).scrollTop() - self.player.y * BLOCK_SIZE,
 					rad = Math.atan2(y, x);
 
 				self.player.light.el.style['-webkit-transform'] = 'rotate(' + rad + 'rad)';
@@ -126,7 +96,7 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawFields();
+							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -141,7 +111,7 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawFields();
+							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -156,7 +126,7 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawFields();
+							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -171,7 +141,7 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawFields();
+							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -182,10 +152,54 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 				}
 			});
 		},
+		drawCanvasFields: function (ctx) {
+			var i, j, self = this;
+			for (i = 0; i<self.x; i+=1) {
+				if ((i > (self.player.x - 6)) && (i < (self.player.x + 6))) {
+					for (j = 0; j<self.y; j+=1) {
+						if ((j > (self.player.y - 6)) && (j < (self.player.y + 6))) {
+							self.field[i][j].dark = false;
+						} else {
+							self.field[i][j].dark = true;
+						}
+						if (self.field[i][j].dark === true) {
+							ctx.fillStyle = '#555555';
+							ctx.fillRect(i*BLOCK_SIZE, j*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                       } else {
+							if (self.field[i][j].content === 'B') {
+								ctx.fillStyle = '#222222';
+							} else if (self.field[i][j].content === 'G') {
+								ctx.fillStyle = '#ffff00';
+							} else if (self.field[i][j].content === 'X') {
+								ctx.fillStyle='#f5f5f5';
+							}
+							ctx.fillRect(i*BLOCK_SIZE, j*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        }
+					}
+				} else {
+					for (j = 0; j<self.y; j+=1) {
+						self.field[i][j].dark = true;
+
+						ctx.fillStyle = '#555555';
+						ctx.fillRect(i*BLOCK_SIZE, j*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+					}
+				}
+			}
+		},
+		drawCanvas: function () {
+			var self = this, ctx, $canvas, canvas;
+			
+			$canvas = $('<canvas width="' + self.x * BLOCK_SIZE + 'px" height="' + self.y * BLOCK_SIZE + 'px">');
+			canvas = $canvas.get(0);
+			self.$el.append(canvas).append(self.player.el).append(self.player.light.el);
+			self.player.draw();
+			$('body').append(self.$el);
+			self.ctx = canvas.getContext("2d");
+			
+			self.drawCanvasFields(self.ctx);
+		},
 		init: function () {
-			var i,
-				j,
-				self = this;
+			var i, j, self = this;
 			for (i = 0; i<self.x; i+=1) {
 				self.field[i] = [];
 				for (j = 0; j<self.y; j+=1) {
@@ -193,30 +207,10 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 				}
 			}
 			this.bindEvents();
-		},
-		draw: function () {
-			var i, j, self = this, $col, $cell;
-
-			for (i = 0; i<self.x; i+=1) {
-				$col = $('<div class="grid-col">');
-				for (j = 0; j<self.y; j+=1) {
-					$cell = $('<div class="grid-cell">');
-					$cell.addClass(self.field[i][j].content).attr('id', 'x'+i+'y'+j);
-					$col.append($cell);
-				}
-				self.$el.append($col);
-			}
-			self.$el.append(self.player.el).append(self.player.light.el);
-			self.player.draw();
-			$('body').append(self.$el);
-
-			self.drawFields();
 		}
 	};
 
 	Grid.create = function (x, y) {
-		GRID_X = x;
-		GRID_Y = y;
 		var g = new Gr(x, y);
 		g.init();
 		return g;

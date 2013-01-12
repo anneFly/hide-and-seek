@@ -8,7 +8,7 @@ body {
     line-height: 0;
     overflow: hidden;
 }
-
+/*
 .grid-col {
     display: inline-block; 
     margin: 0;
@@ -36,7 +36,7 @@ body {
 .grid-cell.dark {
     background: #555555;
 }
-
+*/
 .player {
     width: 20px;
     height: 20px;

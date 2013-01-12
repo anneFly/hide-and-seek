@@ -2,8 +2,8 @@ var Player = (function ($, console, window, document, Player) {
 	"use strict";
 	
 	var BLOCK_SIZE = 20,
-		START_X = 12 * BLOCK_SIZE,
-		START_Y = 12 * BLOCK_SIZE,
+		START_X = 12,
+		START_Y = 12,
 		Light, Pl;
 	
 	
@@ -29,22 +29,22 @@ var Player = (function ($, console, window, document, Player) {
 	
 	Pl.prototype = {
         draw: function () {
-			this.el.style.top = this.y + 'px';
-			this.el.style.left = this.x + 'px';
+			this.el.style.top = this.y * BLOCK_SIZE + 'px';
+			this.el.style.left = this.x * BLOCK_SIZE + 'px';
 			
-			this.light.draw(this.x, this.y);
+			this.light.draw(this.x * BLOCK_SIZE, this.y * BLOCK_SIZE);
 		},
         moveUp: function () {
-			this.y -= BLOCK_SIZE;
+			this.y -= 1;
 		},
         moveLeft: function () {
-			this.x -= BLOCK_SIZE;
+			this.x -= 1;
 		},
         moveDown: function () {
-			this.y += BLOCK_SIZE;
+			this.y += 1;
 		},
         moveRight: function () {
-			this.x += BLOCK_SIZE;
+			this.x += 1;
 		}
 	};
 	
