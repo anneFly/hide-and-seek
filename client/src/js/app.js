@@ -1,4 +1,4 @@
-(function ($, console, Grid, App) {
+(function ($, console, Config, Grid, App) {
 	"use strict";
 
 	App.init = function () {
@@ -6,7 +6,7 @@
 		
 		$.getJSON('src/data/map.json', function(data) {
 			map = data.layout;
-			
+		
 			GRID_X = map[0].length;
 			GRID_Y = map.length;
 
@@ -21,4 +21,4 @@
 		});
 	};
 	App.init();
-}(jQuery, console, Grid, window.App || {}));
+}(jQuery, console, Config, Grid, window.App || {}));

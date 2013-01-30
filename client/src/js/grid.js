@@ -1,9 +1,7 @@
-var Grid = (function ($, console, window, document, Grid, Player) {
+var Grid = (function ($, console, window, document, Config, Player, Grid) {
 	"use strict";
 
-	var BLOCK_SIZE = 20,
-		START_X = 12 * BLOCK_SIZE,
-		START_Y = 12 * BLOCK_SIZE,
+	var BLOCK_SIZE = Config.BLOCK_SIZE,
 		Field, Gr,
 		mouseX = 0, mouseY = 0;
 
@@ -15,8 +13,10 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 	};
 
 	Gr = function (x, y) {
-		this.x = x;
-		this.y = y;
+		this.sizeX = x;
+		this.sizeY = y;
+		this.pixelSizeX = this.sizeX * Config.BLOCK_SIZE;
+		this.pixelSizeY = this.sizeY * Config.BLOCK_SIZE;
 		this.field = [];
 		this.$el = $('<div class="grid">');
 		this.player = Player.create();
@@ -29,7 +29,7 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 				ypos = y,
 				d = new $.Deferred();
 			
-			if ((xpos < 0) || (ypos < 0) || (xpos >= this.x) || (ypos >= this.y)) {
+			if ((xpos < 0) || (ypos < 0) || (xpos >= this.sizeX) || (ypos >= this.sizeY)) {
 				d.reject();
 				return d.promise();
 			}
@@ -56,12 +56,10 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 		updateView: function () {
 			var x = mouseX - this.$el.get(0).offsetLeft + $(window).scrollLeft() - this.player.x * BLOCK_SIZE,
 				y = mouseY - this.$el.get(0).offsetTop + $(window).scrollTop() - this.player.y * BLOCK_SIZE,
-				rad = Math.atan2(y, x);
+				rad = Math.atan2(y, x),
+				deg = rad * (180 / Math.PI);
 
-			this.player.light.el.style['-webkit-transform'] = 'rotate(' + rad + 'rad)';
-			this.player.light.el.style['-moz-transform'] = 'rotate(' + rad + 'rad)';
-			this.player.light.el.style['-ms-transform'] = 'rotate(' + rad + 'rad)';
-			this.player.light.el.style.transform = 'rotate(' + rad + 'rad)';
+			this.drawCanvasFields(this.ctx, rad);
 		},
 		bindEvents: function () {
 			var self = this,
@@ -83,10 +81,7 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 					y = mouseY - this.offsetTop + $(window).scrollTop() - self.player.y * BLOCK_SIZE,
 					rad = Math.atan2(y, x);
 
-				self.player.light.el.style['-webkit-transform'] = 'rotate(' + rad + 'rad)';
-				self.player.light.el.style['-moz-transform'] = 'rotate(' + rad + 'rad)';
-				self.player.light.el.style['-ms-transform'] = 'rotate(' + rad + 'rad)';
-				self.player.light.el.style.transform = 'rotate(' + rad + 'rad)';
+				self.drawCanvasFields(self.ctx, rad);
 			});
 
 			$(document).on('keydown', function (e) {
@@ -96,7 +91,6 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -111,7 +105,6 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -126,7 +119,6 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -141,7 +133,6 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 						function () {
 							self.player.draw();
 							self.updateView();
-							self.drawCanvasFields(self.ctx);
 							checkGoalDeferred();
 						},
 						function () {
@@ -152,57 +143,81 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 				}
 			});
 		},
-		drawCanvasFields: function (ctx) {
-			var i, j, self = this;
-			for (i = 0; i<self.x; i+=1) {
+		drawCanvasFields: function (ctx, rad) {
+			var i, j, self = this, settings, block;
+			ctx.clearRect(0, 0, 1000, 1000);
+			
+			for (i = 0; i<self.sizeX; i+=1) {
 				if ((i > (self.player.x - 6)) && (i < (self.player.x + 6))) {
-					for (j = 0; j<self.y; j+=1) {
+					for (j = 0; j<self.sizeY; j+=1) {
 						if ((j > (self.player.y - 6)) && (j < (self.player.y + 6))) {
-							self.field[i][j].dark = false;
+							if (self.field[i][j].content === 'B') {
+								self.ctx.fillStyle = '#222222';
+							} else if (self.field[i][j].content === 'G') {
+								self.ctx.fillStyle = '#ffff00';
+							} else if (self.field[i][j].content === 'X') {
+								self.ctx.fillStyle='#f5f5f5';
+							}
+							self.ctx.fillRect(i*BLOCK_SIZE, j*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 						} else {
-							self.field[i][j].dark = true;
-						}
-						if (self.field[i][j].dark === true) {
 							ctx.fillStyle = '#555555';
 							ctx.fillRect(i*BLOCK_SIZE, j*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                       } else {
-							if (self.field[i][j].content === 'B') {
-								ctx.fillStyle = '#222222';
-							} else if (self.field[i][j].content === 'G') {
-								ctx.fillStyle = '#ffff00';
-							} else if (self.field[i][j].content === 'X') {
-								ctx.fillStyle='#f5f5f5';
-							}
-							ctx.fillRect(i*BLOCK_SIZE, j*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                        }
-					}
+						}
+					}	
 				} else {
-					for (j = 0; j<self.y; j+=1) {
-						self.field[i][j].dark = true;
-
+					for (j = 0; j<self.sizeY; j+=1) {
 						ctx.fillStyle = '#555555';
 						ctx.fillRect(i*BLOCK_SIZE, j*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 					}
 				}
 			}
+			ctx.save();
+			settings = {
+				size: 'l'
+			};
+			block = (settings.size === 's') ? (self.pixelSizeX/2.2 | 0) : (settings.size === 'm') ? (self.pixelSizeX/2.5 | 0) : (settings.size === 'l') ? (self.pixelSizeX/3 | 0) : (self.pixelSizeX/2.2 | 0);
+			  
+			ctx.translate(self.player.x * BLOCK_SIZE, self.player.y * BLOCK_SIZE);
+				
+			ctx.rotate(rad);
+
+			ctx.translate(-self.player.x * BLOCK_SIZE, -self.player.y * BLOCK_SIZE);
+			ctx.translate((self.player.x - self.sizeX/2) * BLOCK_SIZE, (self.player.y - self.sizeY/2) * BLOCK_SIZE);
+
+			ctx.fillStyle = "#555555";
+			ctx.fillRect(0, 0, (self.pixelSizeX/2 + 1), self.pixelSizeY);
+			ctx.fillRect(self.pixelSizeX - block, 0, block, self.pixelSizeY);
+			ctx.beginPath();
+			ctx.moveTo(self.pixelSizeX, 0);
+			ctx.lineTo(self.pixelSizeX/2,self.pixelSizeY/2);
+			ctx.lineTo(self.pixelSizeX/2,0);
+			ctx.fill();
+			ctx.beginPath();
+			ctx.moveTo(self.pixelSizeX, self.pixelSizeY);
+			ctx.lineTo(self.pixelSizeX/2,self.pixelSizeY);
+			ctx.lineTo(self.pixelSizeX/2,self.pixelSizeY/2);
+			ctx.fill();
+			
+			ctx.restore();
+
 		},
 		drawCanvas: function () {
-			var self = this, ctx, $canvas, canvas;
+			var self = this, $canvas, canvas, i, j;
 			
-			$canvas = $('<canvas width="' + self.x * BLOCK_SIZE + 'px" height="' + self.y * BLOCK_SIZE + 'px">');
+			$canvas = $('<canvas width="' + self.sizeX * BLOCK_SIZE + 'px" height="' + self.sizeY * BLOCK_SIZE + 'px">');
 			canvas = $canvas.get(0);
-			self.$el.append(canvas).append(self.player.el).append(self.player.light.el);
+			self.$el.append(canvas).append(self.player.el);
 			self.player.draw();
 			$('body').append(self.$el);
 			self.ctx = canvas.getContext("2d");
 			
-			self.drawCanvasFields(self.ctx);
+			self.drawCanvasFields(self.ctx, 0);
 		},
 		init: function () {
 			var i, j, self = this;
-			for (i = 0; i<self.x; i+=1) {
+			for (i = 0; i<self.sizeX; i+=1) {
 				self.field[i] = [];
-				for (j = 0; j<self.y; j+=1) {
+				for (j = 0; j<self.sizeY; j+=1) {
 					self.field[i][j] = new Field(i, j);
 				}
 			}
@@ -218,4 +233,4 @@ var Grid = (function ($, console, window, document, Grid, Player) {
 
 	return Grid;
 
-}(jQuery, console, this, this.document, Grid || {}, Player));
+}(jQuery, console, this, this.document, Config, Player, Grid || {}));

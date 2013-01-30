@@ -1,38 +1,24 @@
-var Player = (function ($, console, window, document, Player) {
+var Player = (function ($, console, window, document, Config, Player) {
 	"use strict";
-	
-	var BLOCK_SIZE = 20,
-		START_X = 12,
-		START_Y = 12,
-		Light, Pl;
-	
-	
-	Light = function () {
-		this.x = START_X;
-		this.y = START_Y;
-		this.el = document.createElement('div');
-		this.el.className = "light";
-	};
-	
-	Light.prototype.draw = function (x, y) {
-		this.el.style.top =  y + BLOCK_SIZE / 2 + 'px';
-		this.el.style.left =  x + BLOCK_SIZE / 2 + 'px';
-	};
+
+	var BLOCK_SIZE = Config.BLOCK_SIZE,
+		START_X = Config.PLAYER_START_X,
+		START_Y = Config.PLAYER_START_Y,
+		Pl;
 	
 	Pl = function () {
 		this.x = START_X;
 		this.y = START_Y;
 		this.el = document.createElement('div');
 		this.el.className = "player";
-		this.light = new Light();
+		this.el.style.width = BLOCK_SIZE + 'px';
+		this.el.style.height = BLOCK_SIZE + 'px';
 	};
 	
 	Pl.prototype = {
         draw: function () {
 			this.el.style.top = this.y * BLOCK_SIZE + 'px';
 			this.el.style.left = this.x * BLOCK_SIZE + 'px';
-			
-			this.light.draw(this.x * BLOCK_SIZE, this.y * BLOCK_SIZE);
 		},
         moveUp: function () {
 			this.y -= 1;
@@ -54,4 +40,4 @@ var Player = (function ($, console, window, document, Player) {
 	
 	return Player;
 	
-}(jQuery, console, this, this.document, Player || {}));
+}(jQuery, console, this, this.document, Config, Player || {}));
