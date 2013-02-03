@@ -31,7 +31,8 @@ var Player = (function ($, console, window, document, Config, Player) {
 		},
         moveRight: function () {
 			this.x += 1;
-		}
+		},
+		viewSize: 'm'
 	};
 	
 	Player.create = function () {

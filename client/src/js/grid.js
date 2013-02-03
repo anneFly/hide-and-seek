@@ -144,13 +144,16 @@ var Grid = (function ($, console, window, document, Config, Player, Grid) {
 			});
 		},
 		drawCanvasFields: function (ctx, rad) {
-			var i, j, self = this, settings, block;
+			var i, j, self = this, settings, block, borderX, borderY;
 			ctx.clearRect(0, 0, 1000, 1000);
+
+			borderX = self.sizeX - ((66*self.sizeX/100) | 0);
+			borderY = self.sizeY - ((66*self.sizeY/100) | 0);
 			
 			for (i = 0; i<self.sizeX; i+=1) {
-				if ((i > (self.player.x - 6)) && (i < (self.player.x + 6))) {
+				if ((i > (self.player.x - borderX)) && (i < (self.player.x + borderX))) {
 					for (j = 0; j<self.sizeY; j+=1) {
-						if ((j > (self.player.y - 6)) && (j < (self.player.y + 6))) {
+						if ((j > (self.player.y - borderY)) && (j < (self.player.y + borderY))) {
 							if (self.field[i][j].content === 'B') {
 								self.ctx.fillStyle = '#222222';
 							} else if (self.field[i][j].content === 'G') {
@@ -171,13 +174,14 @@ var Grid = (function ($, console, window, document, Config, Player, Grid) {
 					}
 				}
 			}
+			
 			ctx.save();
 			settings = {
-				size: 'l'
+				size: 's'
 			};
-			block = (settings.size === 's') ? (self.pixelSizeX/2.2 | 0) : (settings.size === 'm') ? (self.pixelSizeX/2.5 | 0) : (settings.size === 'l') ? (self.pixelSizeX/3 | 0) : (self.pixelSizeX/2.2 | 0);
+			block = (settings.size === 's') ? (self.pixelSizeX/3 | 0) : (settings.size === 'm') ? (self.pixelSizeX/3.5 | 0) : (settings.size === 'l') ? (self.pixelSizeX/4 | 0) : (self.pixelSizeX/2.2 | 0);
 			  
-			ctx.translate(self.player.x * BLOCK_SIZE, self.player.y * BLOCK_SIZE);
+			ctx.translate((self.player.x * BLOCK_SIZE) + BLOCK_SIZE/2, (self.player.y * BLOCK_SIZE)  + BLOCK_SIZE/2);
 				
 			ctx.rotate(rad);
 
@@ -199,6 +203,7 @@ var Grid = (function ($, console, window, document, Config, Player, Grid) {
 			ctx.fill();
 			
 			ctx.restore();
+			
 
 		},
 		drawCanvas: function () {
